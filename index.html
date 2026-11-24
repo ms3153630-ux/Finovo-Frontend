@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Finovo — Software House Office</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#f4f3ee; --surface:#ffffff; --surface-2:#eceae2; --ink:#15211c; --muted:#5d6d65;
+    --line:#e0ddd2; --accent:#0c6b4a; --accent-ink:#ffffff; --accent-soft:#dcefe6;
+    --amber:#b97a16; --amber-soft:#f7ead0; --danger:#b3372a; --danger-soft:#f8e2de;
+    --blue:#2b5ea7; --blue-soft:#dde8f6;
+    --shadow:0 10px 30px rgba(21,33,28,.08);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0d1310; --surface:#151d19; --surface-2:#1d2822; --ink:#edf3ef; --muted:#9db2a6;
+      --line:#27352d; --accent:#2fbf8f; --accent-ink:#06231a; --accent-soft:#173a2d;
+      --amber:#e0a83e; --amber-soft:#3a2f14; --danger:#e07a6c; --danger-soft:#3d211c;
+      --blue:#7ba7e0; --blue-soft:#1d2c44;
+      --shadow:0 10px 30px rgba(0,0,0,.45);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Manrope",system-ui,sans-serif; background:var(--bg); color:var(--ink);
+    -webkit-font-smoothing:antialiased; line-height:1.5;
+  }
+  h1,h2,h3,.display{font-family:"Sora",sans-serif; letter-spacing:-.01em}
+  .mono{font-family:"IBM Plex Mono",monospace}
+  button,[role="button"],select,input,textarea{font:inherit}
+  button,[role="button"],select,summary,input:not([type="checkbox"]),textarea{min-height:2.25rem}
+  button{cursor:pointer}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  /* ---------- animations ---------- */
+  @keyframes fadeUp{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
+  @keyframes fadeIn{from{opacity:0} to{opacity:1}}
+  @keyframes popIn{from{opacity:0; transform:scale(.96)} to{opacity:1; transform:scale(1)}}
+  @keyframes pulseDot{0%{box-shadow:0 0 0 0 rgba(47,191,143,.5)} 70%{box-shadow:0 0 0 9px rgba(47,191,143,0)} 100%{box-shadow:0 0 0 0 rgba(47,191,143,0)}}
+  @keyframes barGrow{from{transform:scaleY(0)} to{transform:scaleY(1)}}
+  @keyframes toastIn{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+  .anim-in{animation:fadeUp .5s cubic-bezier(.2,.7,.3,1) both}
+  .stagger > *{animation:fadeUp .55s cubic-bezier(.2,.7,.3,1) both}
+  .stagger > *:nth-child(1){animation-delay:.03s}.stagger > *:nth-child(2){animation-delay:.09s}
+  .stagger > *:nth-child(3){animation-delay:.15s}.stagger > *:nth-child(4){animation-delay:.21s}
+  .stagger > *:nth-child(5){animation-delay:.27s}.stagger > *:nth-child(6){animation-delay:.33s}
+  .stagger > *:nth-child(7){animation-delay:.39s}.stagger > *:nth-child(8){animation-delay:.45s}
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation-duration:.001s !important; transition-duration:.001s !important}
+  }
+
+  /* ---------- login ---------- */
+  #loginView{min-height:100dvh; display:grid; grid-template-columns:1.05fr 1fr}
+  .login-brand{
+    background:var(--accent); color:#eafff5; padding:3rem clamp(1.5rem,4vw,3.5rem);
+    display:flex; flex-direction:column; justify-content:space-between; gap:2rem;
+    position:relative; overflow:hidden;
+  }
+  @media (prefers-color-scheme: dark){ .login-brand{background:#0a3d2b; color:#d9f5e8} }
+  .login-brand::after{
+    content:""; position:absolute; right:-90px; bottom:-90px; width:340px; height:340px;
+    border:2px solid rgba(255,255,255,.18); border-radius:50%;
+  }
+  .login-brand::before{
+    content:""; position:absolute; right:-30px; bottom:-30px; width:200px; height:200px;
+    border:2px solid rgba(255,255,255,.12); border-radius:50%;
+  }
+  .wordmark{font-family:"Sora",sans-serif; font-weight:800; font-size:1.6rem; letter-spacing:-.02em}
+  .wordmark span{color:#ffd98a}
+  .login-brand h1{font-size:clamp(2rem,4.4vw,3.2rem); line-height:1.08; margin:.4rem 0 .8rem; font-weight:800}
+  .login-brand p{max-width:34ch; opacity:.88; font-size:1.02rem; margin:0}
+  .brand-stats{display:flex; gap:2.2rem; flex-wrap:wrap; position:relative; z-index:1}
+  .brand-stats .num{font-family:"Sora",sans-serif; font-weight:700; font-size:1.7rem}
+  .brand-stats .lbl{font-size:.82rem; opacity:.8}
+  .login-form-wrap{display:flex; align-items:center; justify-content:center; padding:2rem 1.25rem}
+  .login-card{width:100%; max-width:420px; animation:fadeUp .6s cubic-bezier(.2,.7,.3,1) both}
+  .login-card h2{font-size:1.55rem; margin:0 0 .3rem}
+  .login-card .sub{color:var(--muted); margin:0 0 1.6rem}
+  .role-toggle{display:grid; grid-template-columns:1fr 1fr; background:var(--surface-2); border-radius:12px; padding:4px; margin-bottom:1.4rem}
+  .role-toggle button{
+    border:0; background:transparent; border-radius:9px; padding:.55rem .5rem; font-weight:700; color:var(--muted);
+    transition:background .2s, color .2s, box-shadow .2s; min-height:2.6rem;
+  }
+  .role-toggle button.active{background:var(--surface); color:var(--ink); box-shadow:0 2px 8px rgba(0,0,0,.12)}
+  .field{margin-bottom:1rem}
+  .field label{display:block; font-weight:700; font-size:.86rem; margin-bottom:.35rem}
+  .field input,.field select,.field textarea{
+    width:100%; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:10px; padding:.6rem .8rem;
+  }
+  .field textarea{resize:vertical; min-height:4.5rem}
+  .btn{
+    border:0; border-radius:10px; padding:.65rem 1.1rem; font-weight:800; background:var(--accent);
+    color:var(--accent-ink); transition:transform .15s, filter .15s; display:inline-flex; align-items:center; gap:.5rem; justify-content:center;
+  }
+  .btn:hover{filter:brightness(1.07)} .btn:active{transform:scale(.97)}
+  .btn.block{width:100%}
+  .btn.ghost{background:var(--surface-2); color:var(--ink)}
+  .btn.small{padding:.4rem .8rem; font-size:.85rem; min-height:2.25rem}
+  .btn.danger{background:var(--danger); color:#fff}
+  .demo-note{margin-top:1.1rem; font-size:.85rem; color:var(--muted); background:var(--surface-2); border-radius:10px; padding:.7rem .9rem}
+  .hidden{display:none !important}
+
+  /* ---------- app shell ---------- */
+  #appView{display:grid; grid-template-columns:250px 1fr; min-height:100dvh}
+  .sidebar{
+    background:var(--surface); border-right:1px solid var(--line); padding:1.4rem 1rem;
+    display:flex; flex-direction:column; gap:1.2rem; position:sticky; top:0; height:100dvh;
+  }
+  .sidebar .wordmark{color:var(--ink); font-size:1.35rem; padding:0 .4rem}
+  .sidebar .wordmark span{color:var(--accent)}
+  .who{display:flex; gap:.7rem; align-items:center; padding:.7rem; background:var(--surface-2); border-radius:12px}
+  .avatar{
+    width:42px; height:42px; border-radius:50%; background:var(--accent); color:var(--accent-ink);
+    display:grid; place-items:center; font-weight:800; font-family:"Sora",sans-serif; flex:none;
+  }
+  .who .nm{font-weight:800; font-size:.92rem; line-height:1.2}
+  .who .rl{font-size:.78rem; color:var(--muted)}
+  nav.main{display:flex; flex-direction:column; gap:.25rem}
+  nav.main button{
+    border:0; background:transparent; color:var(--muted); text-align:left; font-weight:700;
+    padding:.62rem .8rem; border-radius:10px; display:flex; align-items:center; gap:.65rem;
+    transition:background .18s, color .18s;
+  }
+  nav.main button svg{flex:none}
+  nav.main button:hover{background:var(--surface-2); color:var(--ink)}
+  nav.main button.active{background:var(--accent-soft); color:var(--accent)}
+  .side-foot{margin-top:auto}
+  .logout{width:100%}
+  main.content{padding:1.8rem clamp(1rem,3vw,2.4rem) 3rem; max-width:1180px; width:100%; margin:0 auto}
+  .page-head{display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:1.4rem}
+  .page-head h2{font-size:1.7rem; margin:0}
+  .page-head p{color:var(--muted); margin:.2rem 0 0}
+  .clock-chip{display:flex; align-items:center; gap:.55rem; background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:.45rem .95rem; font-weight:700}
+  .live-dot{width:9px; height:9px; border-radius:50%; background:#2fbf8f; animation:pulseDot 1.8s infinite}
+
+  .stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.4rem}
+  .stat-card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:1.1rem 1.15rem; box-shadow:var(--shadow)}
+  .stat-card .k{font-size:.82rem; font-weight:700; color:var(--muted); display:flex; align-items:center; gap:.45rem}
+  .stat-card .v{font-family:"Sora",sans-serif; font-size:1.9rem; font-weight:700; margin-top:.25rem}
+  .stat-card .d{font-size:.82rem; margin-top:.15rem}
+  .up{color:var(--accent); font-weight:700} .down{color:var(--danger); font-weight:700}
+
+  .panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.2rem 1.25rem; margin-bottom:1.4rem}
+  .panel h3{margin:0 0 .2rem; font-size:1.08rem}
+  .panel .panel-sub{color:var(--muted); font-size:.88rem; margin:0 0 1rem}
+  .two-col{display:grid; grid-template-columns:1.6fr 1fr; gap:1.4rem; align-items:start}
+  .two-col .panel{margin-bottom:0}
+
+  /* attendance bars */
+  .bars{display:flex; align-items:flex-end; gap:.7rem; height:150px; padding-top:.5rem}
+  .bar-col{flex:1; display:flex; flex-direction:column; align-items:center; gap:.45rem; height:100%; justify-content:flex-end}
+  .bar{width:100%; max-width:44px; background:var(--accent); border-radius:7px 7px 3px 3px; transform-origin:bottom; animation:barGrow .8s cubic-bezier(.2,.7,.3,1) both}
+  .bar.dim{background:var(--surface-2)}
+  .bar-col .bl{font-size:.78rem; color:var(--muted); font-weight:700}
+  .bar-col .bv{font-size:.8rem; font-weight:800}
+
+  /* lists & tables */
+  .row-item{display:flex; align-items:center; gap:.9rem; padding:.8rem 0; border-bottom:1px solid var(--line)}
+  .row-item:last-child{border-bottom:0}
+  .row-item .grow{flex:1; min-width:0}
+  .row-item .t{font-weight:800}
+  .row-item .s{font-size:.85rem; color:var(--muted)}
+  .pill{display:inline-flex; align-items:center; gap:.3rem; font-size:.75rem; font-weight:800; padding:.22rem .6rem; border-radius:999px; white-space:nowrap}
+  .pill.green{background:var(--accent-soft); color:var(--accent)}
+  .pill.amber{background:var(--amber-soft); color:var(--amber)}
+  .pill.red{background:var(--danger-soft); color:var(--danger)}
+  .pill.blue{background:var(--blue-soft); color:var(--blue)}
+  .pill.gray{background:var(--surface-2); color:var(--muted)}
+  table{width:100%; border-collapse:collapse}
+  th{ text-align:left; font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding:.55rem .6rem; border-bottom:2px solid var(--line)}
+  td{padding:.7rem .6rem; border-bottom:1px solid var(--line); vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  .table-scroll{overflow-x:auto}
+  .progress{height:8px; background:var(--surface-2); border-radius:99px; overflow:hidden; min-width:90px}
+  .progress i{display:block; height:100%; background:var(--accent); border-radius:99px; transition:width .8s cubic-bezier(.2,.7,.3,1)}
+  .icon-btn{border:1px solid var(--line); background:var(--surface); border-radius:9px; width:2.4rem; height:2.4rem; display:grid; place-items:center; color:var(--muted)}
+  .icon-btn:hover{color:var(--danger); border-color:var(--danger)}
+
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 1rem}
+  .form-grid .full{grid-column:1/-1}
+
+  /* attendance check-in card */
+  .checkin-card{text-align:center; padding:1.6rem 1.25rem}
+  .checkin-card .big-clock{font-family:"Sora",sans-serif; font-size:2.6rem; font-weight:800; margin:.4rem 0}
+  .checkin-card .status-line{display:flex; justify-content:center; align-items:center; gap:.5rem; color:var(--muted); font-weight:700}
+
+  /* salary slip */
+  .slip{background:var(--surface-2); border-radius:12px; padding:1.1rem 1.2rem}
+  .slip .line{display:flex; justify-content:space-between; padding:.45rem 0; border-bottom:1px dashed var(--line)}
+  .slip .line:last-child{border-bottom:0}
+  .slip .total{font-family:"Sora",sans-serif; font-weight:800; font-size:1.15rem}
+
+  /* toast */
+  #toast{
+    position:fixed; left:50%; bottom:1.4rem; transform:translateX(-50%); z-index:60;
+    background:var(--ink); color:var(--bg); padding:.75rem 1.2rem; border-radius:12px; font-weight:700;
+    box-shadow:var(--shadow); max-width:min(92vw,480px); text-align:center;
+  }
+  #toast.show{animation:toastIn .3s ease both}
+
+  .empty{padding:1.6rem 1rem; text-align:center; color:var(--muted)}
+  .seg{display:inline-flex; background:var(--surface-2); border-radius:10px; padding:3px; gap:2px}
+  .seg button{border:0; background:transparent; padding:.35rem .8rem; border-radius:8px; font-weight:700; color:var(--muted); min-height:2.1rem}
+  .seg button.active{background:var(--surface); color:var(--ink); box-shadow:0 1px 5px rgba(0,0,0,.12)}
+
+  /* ---------- responsive ---------- */
+  .mobile-topbar{display:none}
+  @media (max-width:900px){
+    #loginView{grid-template-columns:1fr}
+    .login-brand{padding:1.6rem 1.25rem 2rem; min-height:0}
+    .login-brand h1{font-size:1.7rem}
+    .brand-stats{gap:1.4rem}
+    #appView{grid-template-columns:1fr}
+    .sidebar{display:none}
+    .mobile-topbar{
+      display:block; position:sticky; top:0; z-index:40; background:var(--surface);
+      border-bottom:1px solid var(--line); padding:.7rem 1rem .6rem;
+    }
+    .mobile-topbar .mt-row{display:flex; align-items:center; justify-content:space-between; gap:.8rem; margin-bottom:.6rem}
+    .mobile-topbar .wordmark{font-size:1.2rem}
+    .mobile-topbar .wordmark span{color:var(--accent)}
+    nav.mobile{display:flex; gap:.4rem; overflow-x:auto; padding-bottom:.2rem; scrollbar-width:none}
+    nav.mobile::-webkit-scrollbar{display:none}
+    nav.mobile button{
+      border:1px solid var(--line); background:var(--surface); color:var(--muted); font-weight:700;
+      border-radius:999px; padding:.45rem .95rem; white-space:nowrap; min-height:2.4rem;
+    }
+    nav.mobile button.active{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+    .stat-grid{grid-template-columns:1fr 1fr}
+    .two-col{grid-template-columns:1fr}
+    .two-col .panel{margin-bottom:1.4rem}
+    main.content{padding:1.2rem 1rem 3rem}
+    .form-grid{grid-template-columns:1fr}
+  }
+  @media (min-width:901px) and (max-width:1100px){ .stat-grid{grid-template-columns:1fr 1fr} }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<section id="loginView">
+  <div class="login-brand">
+    <div class="anim-in">
+      <div class="wordmark">Finovo<span>.</span></div>
+    </div>
+    <div class="anim-in" style="animation-delay:.12s">
+      <h1>Your software house,<br/>run from one place.</h1>
+      <p>Staff, tasks, attendance, leave and payroll — the whole office in a single, calm workspace.</p>
+    </div>
+    <div class="brand-stats anim-in" style="animation-delay:.24s">
+      <div><div class="num" data-count="24">0</div><div class="lbl">Team members</div></div>
+      <div><div class="num" data-count="18">0</div><div class="lbl">Active projects</div></div>
+      <div><div class="num" data-count="96" data-suffix="%">0</div><div class="lbl">On-time delivery</div></div>
+    </div>
+  </div>
+
+  <div class="login-form-wrap">
+    <form class="login-card" id="loginForm">
+      <h2>Welcome back</h2>
+      <p class="sub">Choose your panel and sign in to continue.</p>
+      <div class="role-toggle" role="tablist" aria-label="Choose panel">
+        <button type="button" id="roleAdmin" class="active">Admin Panel</button>
+        <button type="button" id="roleStaff">Staff Panel</button>
+      </div>
+      <div class="field">
+        <label for="loginName">Your name</label>
+        <input id="loginName" type="text" placeholder="e.g. Ahmed Raza" autocomplete="name" />
+      </div>
+      <div class="field">
+        <label for="loginEmail">Work email</label>
+        <input id="loginEmail" type="email" placeholder="you@finovo.tech" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label for="loginPass">Password</label>
+        <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn block" type="submit" id="loginBtn">Sign in to Admin Panel</button>
+      <div class="demo-note">Frontend preview — any name and password works. Pick a panel above and sign in to explore it.</div>
+    </form>
+  </div>
+</section>
+
+<!-- ================= APP ================= -->
+<section id="appView" class="hidden">
+  <aside class="sidebar">
+    <div class="wordmark">Finovo<span>.</span></div>
+    <div class="who">
+      <div class="avatar" id="sideAvatar">A</div>
+      <div><div class="nm" id="sideName">Admin</div><div class="rl" id="sideRole">Administrator</div></div>
+    </div>
+    <nav class="main" id="sideNav"></nav>
+    <div class="side-foot">
+      <button class="btn ghost logout" id="logoutBtn">Log out</button>
+    </div>
+  </aside>
+
+  <div>
+    <div class="mobile-topbar">
+      <div class="mt-row">
+        <div class="wordmark">Finovo<span>.</span></div>
+        <button class="btn ghost small" id="logoutBtnM">Log out</button>
+      </div>
+      <nav class="mobile" id="mobileNav"></nav>
+    </div>
+    <main class="content" id="content"></main>
+  </div>
+</section>
+
+<div id="toast" class="hidden" role="status"></div>
+
+<script>
+/* ==================== demo data (frontend only, in-memory) ==================== */
+var state = {
+  role: 'admin',
+  userName: 'Ahmed Raza',
+  view: 'dashboard',
+  checkedIn: false,
+  checkInTime: null,
+  staff: [
+    {id:1, name:'Ahmed Raza', role:'Founder / Admin', dept:'Management', email:'ahmed@finovo.tech', salary:350000, status:'Present'},
+    {id:2, name:'Ayesha Khan', role:'Senior React Developer', dept:'Engineering', email:'ayesha@finovo.tech', salary:220000, status:'Present'},
+    {id:3, name:'Bilal Hussain', role:'Backend Developer (Node)', dept:'Engineering', email:'bilal@finovo.tech', salary:185000, status:'Present'},
+    {id:4, name:'Fatima Noor', role:'UI/UX Designer', dept:'Design', email:'fatima@finovo.tech', salary:160000, status:'On leave'},
+    {id:5, name:'Usman Tariq', role:'QA Engineer', dept:'Engineering', email:'usman@finovo.tech', salary:130000, status:'Present'},
+    {id:6, name:'Hira Shahid', role:'Project Manager', dept:'Operations', email:'hira@finovo.tech', salary:200000, status:'Late'},
+    {id:7, name:'Ali Hamza', role:'Mobile Developer (Flutter)', dept:'Engineering', email:'ali@finovo.tech', salary:175000, status:'Present'},
+    {id:8, name:'Zainab Iqbal', role:'HR Executive', dept:'Operations', email:'zainab@finovo.tech', salary:110000, status:'Present'}
+  ],
+  tasks: [
+    {id:1, title:'Client dashboard — payment screens', assignee:'Ayesha Khan', project:'ShopKart App', due:'Today', status:'In progress', progress:65},
+    {id:2, title:'Fix order API timeout on checkout', assignee:'Bilal Hussain', project:'ShopKart App', due:'Today', status:'In progress', progress:40},
+    {id:3, title:'Onboarding flow wireframes v2', assignee:'Fatima Noor', project:'MediBook', due:'Tomorrow', status:'To do', progress:0},
+    {id:4, title:'Regression test pass — release 2.4', assignee:'Usman Tariq', project:'FleetTrack', due:'Fri', status:'In progress', progress:80},
+    {id:5, title:'Push-notification deep links', assignee:'Ali Hamza', project:'MediBook', due:'Thu', status:'To do', progress:10},
+    {id:6, title:'Sprint plan + client demo prep', assignee:'Hira Shahid', project:'Internal', due:'Wed', status:'Done', progress:100}
+  ],
+  leaves: [
+    {id:1, name:'Fatima Noor', type:'Casual leave', from:'Mon', to:'Tue', days:2, reason:'Family commitment', status:'Approved'},
+    {id:2, name:'Bilal Hussain', type:'Sick leave', from:'Wed', to:'Wed', days:1, reason:'Fever', status:'Pending'},
+    {id:3, name:'Ali Hamza', type:'Annual leave', from:'Next Mon', to:'Next Fri', days:5, reason:'Family trip', status:'Pending'}
+  ],
+  attendanceWeek: [
+    {d:'Mon', v:22}, {d:'Tue', v:23}, {d:'Wed', v:21}, {d:'Thu', v:24}, {d:'Fri', v:20}, {d:'Sat', v:8}
+  ],
+  myLeaveSeq: 100
+};
+
+var ADMIN_NAV = [
+  {id:'dashboard', label:'Dashboard'},
+  {id:'staff', label:'Staff'},
+  {id:'tasks', label:'Tasks'},
+  {id:'attendance', label:'Attendance'},
+  {id:'leaves', label:'Leave Requests'},
+  {id:'salary', label:'Salary'}
+];
+var STAFF_NAV = [
+  {id:'myhome', label:'My Overview'},
+  {id:'mytasks', label:'My Tasks'},
+  {id:'myattendance', label:'Attendance'},
+  {id:'myleave', label:'Apply Leave'},
+  {id:'mysalary', label:'My Salary'}
+];
+
+var ICONS = {
+  dashboard:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
+  staff:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.2 3.4-5 6.5-5s5.7 1.8 6.5 5"/><circle cx="17.5" cy="9" r="2.6"/><path d="M16 15.2c2.6.3 4.6 1.9 5.3 4.8"/></svg>',
+  tasks:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>',
+  attendance:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>',
+  leaves:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  salary:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12.5" r="3"/><path d="M6.5 9.5h.01M17.5 15.5h.01"/></svg>'
+};
+function iconFor(id){
+  if(id==='myhome') return ICONS.dashboard;
+  if(id==='mytasks') return ICONS.tasks;
+  if(id==='myattendance') return ICONS.attendance;
+  if(id==='myleave') return ICONS.leaves;
+  if(id==='mysalary') return ICONS.salary;
+  return ICONS[id] || ICONS.dashboard;
+}
+
+/* ==================== helpers ==================== */
+function $(s){ return document.querySelector(s); }
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function money(n){ return 'Rs ' + n.toLocaleString('en-PK'); }
+function initials(name){ return name.split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase(); }
+function statusPill(st){
+  var map = {'Present':'green','Late':'amber','On leave':'blue','Absent':'red',
+             'Done':'green','In progress':'amber','To do':'gray',
+             'Approved':'green','Pending':'amber','Rejected':'red'};
+  return '<span class="pill ' + (map[st]||'gray') + '">' + esc(st) + '</span>';
+}
+var toastTimer = null;
+function toast(msg){
+  var t = $('#toast'); t.textContent = msg; t.classList.remove('hidden'); t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.add('hidden'); t.classList.remove('show'); }, 2600);
+}
+function countUps(scope){
+  scope.querySelectorAll('[data-count]').forEach(function(el){
+    var target = parseInt(el.getAttribute('data-count'),10);
+    var suffix = el.getAttribute('data-suffix') || '';
+    var start = null, dur = 900;
+    function step(ts){
+      if(!start) start = ts;
+      var p = Math.min((ts-start)/dur, 1);
+      var eased = 1 - Math.pow(1-p, 3);
+      el.textContent = Math.round(target*eased) + suffix;
+      if(p<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+}
+function nowTime(){
+  return new Date().toLocaleTimeString('en-PK', {hour:'2-digit', minute:'2-digit'});
+}
+function todayLabel(){
+  return new Date().toLocaleDateString('en-PK', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+}
+/* ==================== navigation / shell ==================== */
+function navItems(){ return state.role === 'admin' ? ADMIN_NAV : STAFF_NAV; }
+function renderNav(){
+  var items = navItems();
+  $('#sideNav').innerHTML = items.map(function(n){
+    return '<button data-nav="' + n.id + '" class="' + (state.view===n.id?'active':'') + '">' + iconFor(n.id) + esc(n.label) + '</button>';
+  }).join('');
+  $('#mobileNav').innerHTML = items.map(function(n){
+    return '<button data-nav="' + n.id + '" class="' + (state.view===n.id?'active':'') + '">' + esc(n.label) + '</button>';
+  }).join('');
+  document.querySelectorAll('[data-nav]').forEach(function(b){
+    b.addEventListener('click', function(){ state.view = b.getAttribute('data-nav'); render(); });
+  });
+}
+function head(title, sub){
+  return '<div class="page-head anim-in"><div><h2>' + esc(title) + '</h2><p>' + esc(sub) + '</p></div>' +
+    '<div class="clock-chip"><span class="live-dot"></span><span class="mono" data-clock>' + nowTime() + '</span></div></div>';
+}
+function render(){
+  renderNav();
+  var c = $('#content');
+  var html = '';
+  if(state.role === 'admin'){
+    if(state.view==='dashboard') html = vAdminDashboard();
+    else if(state.view==='staff') html = vAdminStaff();
+    else if(state.view==='tasks') html = vAdminTasks();
+    else if(state.view==='attendance') html = vAdminAttendance();
+    else if(state.view==='leaves') html = vAdminLeaves();
+    else if(state.view==='salary') html = vAdminSalary();
+  } else {
+    if(state.view==='myhome') html = vStaffHome();
+    else if(state.view==='mytasks') html = vStaffTasks();
+    else if(state.view==='myattendance') html = vStaffAttendance();
+    else if(state.view==='myleave') html = vStaffLeave();
+    else if(state.view==='mysalary') html = vStaffSalary();
+  }
+  c.innerHTML = html;
+  countUps(c);
+  bindView();
+}
+
+/* ==================== ADMIN VIEWS ==================== */
+function vAdminDashboard(){
+  var present = state.staff.filter(function(s){return s.status==='Present'||s.status==='Late';}).length;
+  var openTasks = state.tasks.filter(function(t){return t.status!=='Done';}).length;
+  var pendingLeaves = state.leaves.filter(function(l){return l.status==='Pending';}).length;
+  var payroll = state.staff.reduce(function(a,s){return a+s.salary;},0);
+  var maxBar = Math.max.apply(null, state.attendanceWeek.map(function(x){return x.v;}));
+  var bars = state.attendanceWeek.map(function(x,i){
+    var h = Math.round(x.v/maxBar*100);
+    return '<div class="bar-col"><span class="bv">' + x.v + '</span><div class="bar' + (i===3?'':' dim') + '" style="height:' + h + '%; animation-delay:' + (i*0.07) + 's"></div><span class="bl">' + x.d + '</span></div>';
+  }).join('');
+  var recentTasks = state.tasks.slice(0,4).map(function(t){
+    return '<div class="row-item"><div class="grow"><div class="t">' + esc(t.title) + '</div><div class="s">' + esc(t.assignee) + ' · ' + esc(t.project) + ' · due ' + esc(t.due) + '</div></div>' + statusPill(t.status) + '</div>';
+  }).join('');
+  var teamRows = state.staff.slice(0,5).map(function(s){
+    return '<div class="row-item"><div class="avatar" style="width:38px;height:38px;font-size:.85rem">' + initials(s.name) + '</div><div class="grow"><div class="t">' + esc(s.name) + '</div><div class="s">' + esc(s.role) + '</div></div>' + statusPill(s.status) + '</div>';
+  }).join('');
+  return head('Dashboard', todayLabel() + ' — here is what is happening at Finovo today.') +
+  '<div class="stat-grid stagger">' +
+    '<div class="stat-card"><div class="k">Total staff</div><div class="v" data-count="' + state.staff.length + '">0</div><div class="d"><span class="up">' + present + ' in office</span> right now</div></div>' +
+    '<div class="stat-card"><div class="k">Open tasks</div><div class="v" data-count="' + openTasks + '">0</div><div class="d">across 3 client projects</div></div>' +
+    '<div class="stat-card"><div class="k">Leave requests</div><div class="v" data-count="' + pendingLeaves + '">0</div><div class="d">waiting for approval</div></div>' +
+    '<div class="stat-card"><div class="k">Monthly payroll</div><div class="v">' + money(payroll) + '</div><div class="d"><span class="up">On track</span> for this month</div></div>' +
+  '</div>' +
+  '<div class="two-col">' +
+    '<div class="panel anim-in" style="animation-delay:.1s"><h3>Attendance this week</h3><p class="panel-sub">Team members present per day</p><div class="bars">' + bars + '</div></div>' +
+    '<div class="panel anim-in" style="animation-delay:.18s"><h3>Team today</h3><p class="panel-sub">Who is in and who is away</p>' + teamRows + '</div>' +
+  '</div>' +
+  '<div class="panel anim-in" style="animation-delay:.24s"><h3>Recent tasks</h3><p class="panel-sub">Latest work moving across the studio</p>' + recentTasks + '</div>';
+}
+
+function vAdminStaff(){
+  var rows = state.staff.map(function(s){
+    return '<div class="row-item"><div class="avatar" style="width:40px;height:40px;font-size:.9rem">' + initials(s.name) + '</div>' +
+      '<div class="grow"><div class="t">' + esc(s.name) + '</div><div class="s">' + esc(s.role) + ' · ' + esc(s.email) + '</div></div>' +
+      '<span class="pill gray">' + esc(s.dept) + '</span>' + statusPill(s.status) +
+      '<button class="icon-btn" data-del-staff="' + s.id + '" aria-label="Remove ' + esc(s.name) + '"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button></div>';
+  }).join('');
+  return head('Staff', state.staff.length + ' people on the Finovo team.') +
+  '<div class="two-col">' +
+    '<div class="panel anim-in"><h3>Team members</h3><p class="panel-sub">Everyone who works at Finovo</p>' + (rows || '<div class="empty">No staff yet — add the first member.</div>') + '</div>' +
+    '<div class="panel anim-in" style="animation-delay:.1s"><h3>Add staff member</h3><p class="panel-sub">They will appear in the team list right away.</p>' +
+      '<form id="addStaffForm"><div class="field"><label for="nsName">Full name</label><input id="nsName" required placeholder="e.g. Mahnoor Fatima" /></div>' +
+      '<div class="field"><label for="nsRole">Job title</label><input id="nsRole" required placeholder="e.g. Frontend Developer" /></div>' +
+      '<div class="field"><label for="nsDept">Department</label><select id="nsDept"><option>Engineering</option><option>Design</option><option>Operations</option><option>Management</option></select></div>' +
+      '<div class="field"><label for="nsSalary">Monthly salary (Rs)</label><input id="nsSalary" type="number" min="0" step="1000" required placeholder="150000" /></div>' +
+      '<button class="btn block" type="submit">Add member</button></form></div>' +
+  '</div>';
+}
+
+function vAdminTasks(){
+  var rows = state.tasks.map(function(t){
+    return '<div class="row-item"><div class="grow"><div class="t">' + esc(t.title) + '</div><div class="s">' + esc(t.assignee) + ' · ' + esc(t.project) + ' · due ' + esc(t.due) + '</div>' +
+      '<div class="progress" style="margin-top:.5rem; max-width:260px"><i style="width:' + t.progress + '%"></i></div></div>' + statusPill(t.status) + '</div>';
+  }).join('');
+  var staffOptions = state.staff.map(function(s){ return '<option>' + esc(s.name) + '</option>'; }).join('');
+  return head('Tasks', 'Assign work and follow progress across projects.') +
+  '<div class="two-col">' +
+    '<div class="panel anim-in"><h3>All tasks</h3><p class="panel-sub">' + state.tasks.length + ' tasks on the board</p>' + rows + '</div>' +
+    '<div class="panel anim-in" style="animation-delay:.1s"><h3>Assign a task</h3><p class="panel-sub">Send new work to a team member.</p>' +
+      '<form id="addTaskForm"><div class="field"><label for="ntTitle">Task title</label><input id="ntTitle" required placeholder="e.g. Landing page redesign" /></div>' +
+      '<div class="field"><label for="ntAssignee">Assign to</label><select id="ntAssignee">' + staffOptions + '</select></div>' +
+      '<div class="field"><label for="ntProject">Project</label><input id="ntProject" required placeholder="e.g. ShopKart App" /></div>' +
+      '<div class="field"><label for="ntDue">Due</label><select id="ntDue"><option>Today</option><option>Tomorrow</option><option>Wed</option><option>Thu</option><option>Fri</option></select></div>' +
+      '<button class="btn block" type="submit">Assign task</button></form></div>' +
+  '</div>';
+}
+
+function vAdminAttendance(){
+  var rows = state.staff.map(function(s,i){
+    var inTime = s.status==='Present' ? '09:0' + (i%10) + ' AM' : (s.status==='Late' ? '09:4' + (i%10) + ' AM' : '—');
+    return '<tr><td><strong>' + esc(s.name) + '</strong><br/><span style="color:var(--muted);font-size:.85rem">' + esc(s.dept) + '</span></td><td class="mono">' + inTime + '</td><td>' + statusPill(s.status) + '</td></tr>';
+  }).join('');
+  var present = state.staff.filter(function(s){return s.status==='Present';}).length;
+  var late = state.staff.filter(function(s){return s.status==='Late';}).length;
+  var leave = state.staff.filter(function(s){return s.status==='On leave';}).length;
+  return head('Attendance', 'Today\'s check-ins across the office.') +
+  '<div class="stat-grid stagger">' +
+    '<div class="stat-card"><div class="k">Present</div><div class="v" data-count="' + present + '">0</div><div class="d">checked in on time</div></div>' +
+    '<div class="stat-card"><div class="k">Late</div><div class="v" data-count="' + late + '">0</div><div class="d">arrived after 9:15 AM</div></div>' +
+    '<div class="stat-card"><div class="k">On leave</div><div class="v" data-count="' + leave + '">0</div><div class="d">approved leave today</div></div>' +
+    '<div class="stat-card"><div class="k">Office hours</div><div class="v" style="font-size:1.35rem">9 AM – 6 PM</div><div class="d">Mon to Sat</div></div>' +
+  '</div>' +
+  '<div class="panel anim-in"><h3>Today\'s register</h3><p class="panel-sub">' + todayLabel() + '</p><div class="table-scroll"><table><thead><tr><th>Member</th><th>Check-in</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+}
+
+function vAdminLeaves(){
+  var rows = state.leaves.map(function(l){
+    var actions = l.status==='Pending'
+      ? '<button class="btn small" data-approve="' + l.id + '">Approve</button> <button class="btn small danger" data-reject="' + l.id + '">Reject</button>'
+      : '';
+    return '<div class="row-item"><div class="avatar" style="width:40px;height:40px;font-size:.9rem">' + initials(l.name) + '</div>' +
+      '<div class="grow"><div class="t">' + esc(l.name) + ' — ' + esc(l.type) + '</div><div class="s">' + esc(l.from) + ' to ' + esc(l.to) + ' · ' + l.days + (l.days===1?' day':' days') + ' · ' + esc(l.reason) + '</div></div>' +
+      statusPill(l.status) + '<span style="display:flex;gap:.4rem">' + actions + '</span></div>';
+  }).join('');
+  return head('Leave Requests', 'Approve or reject time-off requests from the team.') +
+  '<div class="panel anim-in"><h3>Requests</h3><p class="panel-sub">' + state.leaves.filter(function(l){return l.status==='Pending';}).length + ' waiting for a decision</p>' + (rows || '<div class="empty">No leave requests right now.</div>') + '</div>';
+}
+
+function vAdminSalary(){
+  var rows = state.staff.map(function(s){
+    var tax = Math.round(s.salary * 0.05);
+    return '<tr><td><strong>' + esc(s.name) + '</strong><br/><span style="color:var(--muted);font-size:.85rem">' + esc(s.role) + '</span></td><td class="mono">' + money(s.salary) + '</td><td class="mono">' + money(tax) + '</td><td class="mono"><strong>' + money(s.salary - tax) + '</strong></td><td><span class="pill green">Ready</span></td></tr>';
+  }).join('');
+  var total = state.staff.reduce(function(a,s){return a+s.salary;},0);
+  return head('Salary', 'Monthly payroll for the whole team.') +
+  '<div class="stat-grid stagger">' +
+    '<div class="stat-card"><div class="k">Gross payroll</div><div class="v" style="font-size:1.5rem">' + money(total) + '</div><div class="d">for ' + state.staff.length + ' members</div></div>' +
+    '<div class="stat-card"><div class="k">Tax withheld (5%)</div><div class="v" style="font-size:1.5rem">' + money(Math.round(total*0.05)) + '</div><div class="d">deducted at source</div></div>' +
+    '<div class="stat-card"><div class="k">Net payable</div><div class="v" style="font-size:1.5rem">' + money(total - Math.round(total*0.05)) + '</div><div class="d"><span class="up">Ready</span> to disburse</div></div>' +
+    '<div class="stat-card"><div class="k">Pay day</div><div class="v" style="font-size:1.5rem">1st</div><div class="d">of every month</div></div>' +
+  '</div>' +
+  '<div class="panel anim-in"><h3>Payroll — this month</h3><p class="panel-sub">Salary breakdown per member</p><div class="table-scroll"><table><thead><tr><th>Member</th><th>Gross</th><th>Tax</th><th>Net</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+}
+
+/* ==================== STAFF VIEWS ==================== */
+function me(){ return state.staff[1]; /* Ayesha Khan — the demo staff profile */ }
+function myTasks(){ return state.tasks.filter(function(t){ return t.assignee === me().name; }); }
+
+function vStaffHome(){
+  var mine = myTasks();
+  var open = mine.filter(function(t){return t.status!=='Done';}).length;
+  var taskRows = mine.map(function(t){
+    return '<div class="row-item"><div class="grow"><div class="t">' + esc(t.title) + '</div><div class="s">' + esc(t.project) + ' · due ' + esc(t.due) + '</div></div>' + statusPill(t.status) + '</div>';
+  }).join('');
+  return head('Assalam-o-Alaikum, ' + esc(state.userName.split(' ')[0]), todayLabel() + ' — your day at Finovo, at a glance.') +
+  '<div class="stat-grid stagger">' +
+    '<div class="stat-card"><div class="k">My open tasks</div><div class="v" data-count="' + open + '">0</div><div class="d">to work on</div></div>' +
+    '<div class="stat-card"><div class="k">Attendance</div><div class="v" style="font-size:1.4rem">' + (state.checkedIn ? 'Checked in' : 'Not yet') + '</div><div class="d">' + (state.checkedIn ? 'since ' + esc(state.checkInTime) : 'tap Attendance to check in') + '</div></div>' +
+    '<div class="stat-card"><div class="k">Leave balance</div><div class="v" data-count="14">0</div><div class="d">days remaining this year</div></div>' +
+    '<div class="stat-card"><div class="k">This month</div><div class="v" style="font-size:1.4rem">' + money(me().salary) + '</div><div class="d">salary due on the 1st</div></div>' +
+  '</div>' +
+  '<div class="panel anim-in"><h3>My tasks</h3><p class="panel-sub">What is on your plate</p>' + (taskRows || '<div class="empty">No tasks assigned to you yet.</div>') + '</div>';
+}
+
+function vStaffTasks(){
+  var rows = myTasks().map(function(t){
+    var next = t.status==='To do' ? 'In progress' : (t.status==='In progress' ? 'Done' : null);
+    var btn = next ? '<button class="btn small" data-advance="' + t.id + '">' + (next==='Done' ? 'Mark done' : 'Start task') + '</button>' : '<span class="pill green">Completed</span>';
+    return '<div class="row-item"><div class="grow"><div class="t">' + esc(t.title) + '</div><div class="s">' + esc(t.project) + ' · due ' + esc(t.due) + '</div>' +
+      '<div class="progress" style="margin-top:.5rem; max-width:260px"><i style="width:' + t.progress + '%"></i></div></div>' + statusPill(t.status) + btn + '</div>';
+  }).join('');
+  return head('My Tasks', 'Your assigned work — update status as you go.') +
+  '<div class="panel anim-in"><h3>Assigned to me</h3><p class="panel-sub">' + myTasks().length + ' tasks</p>' + (rows || '<div class="empty">No tasks assigned to you yet.</div>') + '</div>';
+}
+
+function vStaffAttendance(){
+  var statusLine = state.checkedIn
+    ? '<span class="live-dot"></span> Checked in at ' + esc(state.checkInTime) + ' — you are in office'
+    : 'You have not checked in yet today';
+  var btn = state.checkedIn
+    ? '<button class="btn danger" id="checkBtn" style="min-width:210px">Check out</button>'
+    : '<button class="btn" id="checkBtn" style="min-width:210px">Check in now</button>';
+  return head('Attendance', 'Mark your presence for today.') +
+  '<div class="panel checkin-card anim-in"><div class="status-line">' + statusLine + '</div>' +
+    '<div class="big-clock mono" data-clock>' + nowTime() + '</div>' +
+    '<p style="color:var(--muted);margin:0 0 1.2rem">' + todayLabel() + ' · Office hours 9 AM – 6 PM</p>' + btn + '</div>' +
+  '<div class="panel anim-in" style="animation-delay:.1s"><h3>This week</h3><p class="panel-sub">Your recent attendance</p>' +
+    '<div class="row-item"><div class="grow"><div class="t">Monday</div><div class="s">9:02 AM – 6:05 PM</div></div><span class="pill green">Present</span></div>' +
+    '<div class="row-item"><div class="grow"><div class="t">Tuesday</div><div class="s">8:58 AM – 6:01 PM</div></div><span class="pill green">Present</span></div>' +
+    '<div class="row-item"><div class="grow"><div class="t">Wednesday</div><div class="s">9:21 AM – 6:10 PM</div></div><span class="pill amber">Late</span></div>' +
+    '<div class="row-item"><div class="grow"><div class="t">Today</div><div class="s">' + (state.checkedIn ? 'In at ' + esc(state.checkInTime) : 'Not checked in') + '</div></div>' + (state.checkedIn ? '<span class="pill green">Present</span>' : '<span class="pill gray">Pending</span>') + '</div></div>';
+}
+
+function vStaffLeave(){
+  var mine = state.leaves.filter(function(l){ return l.name === me().name; });
+  var rows = mine.map(function(l){
+    return '<div class="row-item"><div class="grow"><div class="t">' + esc(l.type) + '</div><div class="s">' + esc(l.from) + ' to ' + esc(l.to) + ' · ' + l.days + (l.days===1?' day':' days') + ' · ' + esc(l.reason) + '</div></div>' + statusPill(l.status) + '</div>';
+  }).join('');
+  return head('Apply Leave', 'Request time off — admin gets it instantly in this preview.') +
+  '<div class="two-col">' +
+    '<div class="panel anim-in"><h3>New request</h3><p class="panel-sub">Fill in the days you need off.</p>' +
+      '<form id="leaveForm"><div class="form-grid">' +
+      '<div class="field"><label for="lvType">Leave type</label><select id="lvType"><option>Casual leave</option><option>Sick leave</option><option>Annual leave</option></select></div>' +
+      '<div class="field"><label for="lvDays">Number of days</label><input id="lvDays" type="number" min="1" max="30" value="1" required /></div>' +
+      '<div class="field"><label for="lvFrom">From</label><input id="lvFrom" required placeholder="e.g. Mon" /></div>' +
+      '<div class="field"><label for="lvTo">To</label><input id="lvTo" required placeholder="e.g. Tue" /></div>' +
+      '<div class="field full"><label for="lvReason">Reason</label><textarea id="lvReason" required placeholder="Short reason for the leave"></textarea></div></div>' +
+      '<button class="btn block" type="submit">Submit request</button></form></div>' +
+    '<div class="panel anim-in" style="animation-delay:.1s"><h3>My requests</h3><p class="panel-sub">Your leave history</p>' + (rows || '<div class="empty">You have not applied for leave yet.</div>') + '</div>' +
+  '</div>';
+}
+
+function vStaffSalary(){
+  var s = me(); var gross = s.salary; var tax = Math.round(gross*0.05);
+  var allow = 15000; var base = gross - allow;
+  return head('My Salary', 'Your pay slip for this month.') +
+  '<div class="two-col">' +
+    '<div class="panel anim-in"><h3>Pay slip</h3><p class="panel-sub">' + esc(s.name) + ' · ' + esc(s.role) + '</p>' +
+      '<div class="slip">' +
+      '<div class="line"><span>Basic salary</span><span class="mono">' + money(base) + '</span></div>' +
+      '<div class="line"><span>Allowances</span><span class="mono">' + money(allow) + '</span></div>' +
+      '<div class="line"><span>Gross pay</span><span class="mono">' + money(gross) + '</span></div>' +
+      '<div class="line"><span>Income tax (5%)</span><span class="mono">− ' + money(tax) + '</span></div>' +
+      '<div class="line total"><span>Net pay</span><span class="mono">' + money(gross - tax) + '</span></div>' +
+      '</div>' +
+      '<p style="color:var(--muted);font-size:.88rem;margin:1rem 0 0">Paid on the 1st of every month to your bank account.</p></div>' +
+    '<div class="panel anim-in" style="animation-delay:.1s"><h3>Year so far</h3><p class="panel-sub">Your earnings summary</p>' +
+      '<div class="row-item"><div class="grow"><div class="t">Months paid</div><div class="s">This financial year</div></div><strong class="mono">7</strong></div>' +
+      '<div class="row-item"><div class="grow"><div class="t">Total earned</div><div class="s">Gross, year to date</div></div><strong class="mono">' + money(gross*7) + '</strong></div>' +
+      '<div class="row-item"><div class="grow"><div class="t">Leave balance</div><div class="s">Days remaining</div></div><strong class="mono">14</strong></div></div>' +
+  '</div>';
+}
+
+/* ==================== view bindings ==================== */
+function bindView(){
+  var f;
+  f = $('#addStaffForm');
+  if(f) f.addEventListener('submit', function(e){
+    e.preventDefault();
+    var name = $('#nsName').value.trim(); if(!name) return;
+    state.staff.push({id: Date.now(), name:name, role:$('#nsRole').value.trim()||'Team member', dept:$('#nsDept').value,
+      email: name.toLowerCase().replace(/[^a-z]+/g,'.') + '@finovo.tech', salary: parseInt($('#nsSalary').value,10)||0, status:'Present'});
+    toast(name + ' added to the team'); render();
+  });
+  document.querySelectorAll('[data-del-staff]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var id = parseInt(b.getAttribute('data-del-staff'),10);
+      var person = state.staff.filter(function(s){return s.id===id;})[0];
+      state.staff = state.staff.filter(function(s){return s.id!==id;});
+      toast((person?person.name:'Member') + ' removed'); render();
+    });
+  });
+  f = $('#addTaskForm');
+  if(f) f.addEventListener('submit', function(e){
+    e.preventDefault();
+    var title = $('#ntTitle').value.trim(); if(!title) return;
+    state.tasks.unshift({id: Date.now(), title:title, assignee:$('#ntAssignee').value, project:$('#ntProject').value.trim()||'Internal', due:$('#ntDue').value, status:'To do', progress:0});
+    toast('Task assigned to ' + $('#ntAssignee').value); render();
+  });
+  document.querySelectorAll('[data-approve]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var l = state.leaves.filter(function(x){return x.id===parseInt(b.getAttribute('data-approve'),10);})[0];
+      if(l){ l.status='Approved'; toast('Leave approved for ' + l.name); render(); }
+    });
+  });
+  document.querySelectorAll('[data-reject]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var l = state.leaves.filter(function(x){return x.id===parseInt(b.getAttribute('data-reject'),10);})[0];
+      if(l){ l.status='Rejected'; toast('Leave rejected for ' + l.name); render(); }
+    });
+  });
+  document.querySelectorAll('[data-advance]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var t = state.tasks.filter(function(x){return x.id===parseInt(b.getAttribute('data-advance'),10);})[0];
+      if(t){
+        if(t.status==='To do'){ t.status='In progress'; t.progress=25; }
+        else if(t.status==='In progress'){ t.status='Done'; t.progress=100; }
+        toast('Task updated: ' + t.status); render();
+      }
+    });
+  });
+  var cb = $('#checkBtn');
+  if(cb) cb.addEventListener('click', function(){
+    if(!state.checkedIn){ state.checkedIn = true; state.checkInTime = nowTime(); toast('Checked in at ' + state.checkInTime); }
+    else { state.checkedIn = false; toast('Checked out at ' + nowTime() + ' — see you tomorrow'); state.checkInTime = null; }
+    render();
+  });
+  f = $('#leaveForm');
+  if(f) f.addEventListener('submit', function(e){
+    e.preventDefault();
+    state.leaves.unshift({id: Date.now(), name: me().name, type: $('#lvType').value, from: $('#lvFrom').value.trim(),
+      to: $('#lvTo').value.trim(), days: parseInt($('#lvDays').value,10)||1, reason: $('#lvReason').value.trim(), status:'Pending'});
+    toast('Leave request submitted'); render();
+  });
+}
+
+/* ==================== login / logout ==================== */
+var loginRole = 'admin';
+function setRole(r){
+  loginRole = r;
+  $('#roleAdmin').classList.toggle('active', r==='admin');
+  $('#roleStaff').classList.toggle('active', r==='staff');
+  $('#loginBtn').textContent = r==='admin' ? 'Sign in to Admin Panel' : 'Sign in to Staff Panel';
+  $('#loginName').placeholder = r==='admin' ? 'e.g. Ahmed Raza' : 'e.g. Ayesha Khan';
+}
+$('#roleAdmin').addEventListener('click', function(){ setRole('admin'); });
+$('#roleStaff').addEventListener('click', function(){ setRole('staff'); });
+$('#loginForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var name = $('#loginName').value.trim();
+  state.role = loginRole;
+  state.userName = name || (loginRole==='admin' ? 'Ahmed Raza' : 'Ayesha Khan');
+  state.view = loginRole==='admin' ? 'dashboard' : 'myhome';
+  $('#sideName').textContent = state.userName;
+  $('#sideRole').textContent = loginRole==='admin' ? 'Administrator' : me().role;
+  $('#sideAvatar').textContent = initials(state.userName);
+  $('#loginView').classList.add('hidden');
+  var app = $('#appView'); app.classList.remove('hidden'); app.style.animation = 'fadeIn .45s ease both';
+  render();
+  toast('Welcome, ' + state.userName.split(' ')[0] + ' — ' + (loginRole==='admin' ? 'Admin' : 'Staff') + ' panel');
+});
+function logout(){
+  $('#appView').classList.add('hidden');
+  $('#loginView').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+$('#logoutBtn').addEventListener('click', logout);
+$('#logoutBtnM').addEventListener('click', logout);
+
+/* live clocks + login counters */
+setInterval(function(){
+  document.querySelectorAll('[data-clock]').forEach(function(el){ el.textContent = nowTime(); });
+}, 1000);
+countUps(document);
+</script>
+</body>
+</html>
